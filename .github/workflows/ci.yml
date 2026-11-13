@@ -28,6 +28,15 @@ jobs:
       CXX: ${{ matrix.cxx }}
       CXXFLAGS: ${{ matrix.cxxflags }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/ci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
       - run: sudo apt-get update
       - name: Install dependencies
         run: >
@@ -38,8 +47,6 @@ jobs:
           googletest
           meson
           g++
-      - name: Checkout code
-        uses: actions/checkout@v2
       - run: meson build/
       - run: ninja -C build/
       - run: ninja -C build/ test
